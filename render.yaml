@@ -23,3 +23,7 @@ services:
         value: "2"
       - key: GUNICORN_TIMEOUT
         value: "180"
+      - key: ORT_INTRA_OP_THREADS
+        value: "1"
+      - key: ORT_INTER_OP_THREADS
+        value: "1"

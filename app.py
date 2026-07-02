@@ -3,6 +3,7 @@ from __future__ import annotations
 import io
 import os
 import threading
+import time
 import wave
 from typing import Any
 
@@ -117,10 +118,15 @@ def voices():
 
 @app.post("/api/tts")
 def tts():
+    start_time = time.perf_counter()
+    load_done = start_time
+    generate_done = start_time
     try:
         text, voice, speed = validate_tts_payload(request.get_json(silent=True))
         model = get_tts_model()
+        load_done = time.perf_counter()
         audio = model.generate(text, voice=voice, speed=speed)
+        generate_done = time.perf_counter()
         wav_buffer = audio_to_wav_bytes(audio)
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
@@ -136,6 +142,21 @@ def tts():
         download_name=filename,
     )
     response.headers["Cache-Control"] = "no-store"
+    total_done = time.perf_counter()
+    response.headers["Server-Timing"] = (
+        f"load;dur={(load_done - start_time) * 1000:.1f}, "
+        f"generate;dur={(generate_done - load_done) * 1000:.1f}, "
+        f"wav;dur={(total_done - generate_done) * 1000:.1f}"
+    )
+    app.logger.info(
+        "tts timing text_len=%s voice=%s load=%.3fs generate=%.3fs wav=%.3fs total=%.3fs",
+        len(text),
+        voice,
+        load_done - start_time,
+        generate_done - load_done,
+        total_done - generate_done,
+        total_done - start_time,
+    )
     return response
 
 

@@ -82,7 +82,16 @@ class KittenOnnxModel:
     ) -> None:
         self.model_path = str(model_path)
         self.voices = np.load(voices_path)
-        self.session = ort.InferenceSession(self.model_path)
+        session_options = ort.SessionOptions()
+        session_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+        session_options.intra_op_num_threads = int(os.getenv("ORT_INTRA_OP_THREADS", "1"))
+        session_options.inter_op_num_threads = int(os.getenv("ORT_INTER_OP_THREADS", "1"))
+        session_options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
+        self.session = ort.InferenceSession(
+            self.model_path,
+            sess_options=session_options,
+            providers=["CPUExecutionProvider"],
+        )
         self.phonemizer = phonemizer.backend.EspeakBackend(
             language="en-us",
             preserve_punctuation=True,

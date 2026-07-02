@@ -38,6 +38,8 @@ Create a Render Web Service from this repository. `render.yaml` defines:
 
 The service uses `gunicorn.conf.py` to set one worker, two threads, and a 180 second timeout, even if Render runs plain `gunicorn app:app`. The build step preloads the Hugging Face model files into `.cache/huggingface` so the first `/api/tts` request does not have to download the model.
 
+`/api/tts` returns a `Server-Timing` header and logs timing for model load, generation, WAV encoding, and total request time. ONNX Runtime is capped to one intra-op and one inter-op thread by default, which is usually more predictable on small Render instances.
+
 ## API
 
 `GET /api/voices`

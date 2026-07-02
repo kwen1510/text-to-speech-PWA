@@ -34,7 +34,7 @@ def get_tts_model() -> Any:
         if _model is not None:
             return _model
 
-        from kittentts import KittenTTS
+        from kitten_runtime import KittenTTS
 
         try:
             _model = KittenTTS(DEFAULT_MODEL_NAME)

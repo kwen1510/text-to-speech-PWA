@@ -1,4 +1,7 @@
 Flask==3.1.1
 gunicorn==23.0.0
 numpy>=1.26,<3
-https://github.com/KittenML/KittenTTS/releases/download/0.8.1/kittentts-0.8.1-py3-none-any.whl
+huggingface_hub>=0.23,<2
+onnxruntime>=1.18,<2
+phonemizer-fork==3.3.2
+espeakng_loader==0.2.4

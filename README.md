@@ -2,6 +2,8 @@
 
 Single-service Flask app for running real KittenTTS text to speech on Render. Flask serves the mobile web UI and the `/api/tts` endpoint returns generated WAV audio.
 
+This repo uses a slim local KittenTTS runtime instead of the official `kittentts` wheel, because the official wheel pulls in large packages that are not needed for the ONNX + eSpeak inference path used by this app.
+
 This is online synthesis, not offline phone inference. Render Free can run it for personal testing, but idle services spin down and the first request after sleep can be slow.
 
 ## Local development

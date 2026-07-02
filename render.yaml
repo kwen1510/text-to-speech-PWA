@@ -3,7 +3,7 @@ services:
     name: kitten-tts-web
     runtime: python
     plan: free
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && python scripts/preload_model.py
     startCommand: gunicorn app:app --workers 1 --threads 2 --timeout 180
     healthCheckPath: /healthz
     envVars:
@@ -15,3 +15,5 @@ services:
         value: KittenML/kitten-tts-nano-0.8
       - key: KITTEN_FALLBACK_MODEL_NAME
         value: KittenML/kitten-tts-mini-0.8
+      - key: KITTEN_CACHE_DIR
+        value: .cache/huggingface

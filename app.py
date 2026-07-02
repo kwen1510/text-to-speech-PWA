@@ -14,6 +14,7 @@ SAMPLE_RATE = 24_000
 MAX_TEXT_LENGTH = int(os.getenv("MAX_TEXT_LENGTH", "1000"))
 DEFAULT_MODEL_NAME = os.getenv("KITTEN_MODEL_NAME", "KittenML/kitten-tts-nano-0.8")
 FALLBACK_MODEL_NAME = os.getenv("KITTEN_FALLBACK_MODEL_NAME", "KittenML/kitten-tts-mini-0.8")
+MODEL_CACHE_DIR = os.getenv("KITTEN_CACHE_DIR", ".cache/huggingface")
 VOICE_NAMES = ("Bella", "Jasper", "Luna", "Bruno", "Rosie", "Hugo", "Kiki", "Leo")
 
 
@@ -37,12 +38,12 @@ def get_tts_model() -> Any:
         from kitten_runtime import KittenTTS
 
         try:
-            _model = KittenTTS(DEFAULT_MODEL_NAME)
+            _model = KittenTTS(DEFAULT_MODEL_NAME, cache_dir=MODEL_CACHE_DIR)
             _model_name = DEFAULT_MODEL_NAME
         except Exception:
             if FALLBACK_MODEL_NAME == DEFAULT_MODEL_NAME:
                 raise
-            _model = KittenTTS(FALLBACK_MODEL_NAME)
+            _model = KittenTTS(FALLBACK_MODEL_NAME, cache_dir=MODEL_CACHE_DIR)
             _model_name = FALLBACK_MODEL_NAME
 
         return _model

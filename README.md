@@ -32,11 +32,11 @@ curl -X POST http://127.0.0.1:5000/api/tts \
 
 Create a Render Web Service from this repository. `render.yaml` defines:
 
-- build command: `pip install -r requirements.txt`
+- build command: `pip install -r requirements.txt && python scripts/preload_model.py`
 - start command: `gunicorn app:app --workers 1 --threads 2 --timeout 180`
 - health check: `/healthz`
 
-The service uses one Gunicorn worker so the KittenTTS model is loaded once per process.
+The service uses one Gunicorn worker so the KittenTTS model is loaded once per process. The build step preloads the Hugging Face model files into `.cache/huggingface` so the first `/api/tts` request does not have to download the model.
 
 ## API
 

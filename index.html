@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#111827">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Kitten TTS">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Kitten TTS PWA</title>
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="./icons/icon.svg">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="panel">
+        <header class="header">
+          <div>
+            <p class="eyebrow">Offline model cache</p>
+            <h1>Kitten TTS</h1>
+          </div>
+          <span id="connectionStatus" class="status-pill">Checking</span>
+        </header>
+
+        <label class="field">
+          <span>Text</span>
+          <textarea id="textInput" rows="7" spellcheck="true">This app can keep Kitten TTS model files on your phone after refresh.</textarea>
+        </label>
+
+        <div class="controls-grid">
+          <label class="field">
+            <span>Voice</span>
+            <select id="voiceSelect">
+              <option>Bella</option>
+              <option>Jasper</option>
+              <option>Luna</option>
+              <option>Bruno</option>
+              <option>Rosie</option>
+              <option>Hugo</option>
+              <option>Kiki</option>
+              <option>Leo</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Speed</span>
+            <input id="speedInput" type="range" min="0.7" max="1.4" step="0.05" value="1">
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="downloadButton" type="button">Download model</button>
+          <button id="clearButton" class="secondary" type="button">Clear model</button>
+        </div>
+
+        <div class="progress-wrap" aria-live="polite">
+          <div class="progress-track">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+          <p id="statusText">Preparing cache check...</p>
+        </div>
+      </section>
+
+      <section class="model-list" aria-label="Cached files">
+        <div class="list-header">
+          <h2>Cached model files</h2>
+          <span id="storageEstimate">Storage pending</span>
+        </div>
+        <ul id="assetList"></ul>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

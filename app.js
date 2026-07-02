@@ -1,5 +1,5 @@
 const MODEL_CACHE = "kitten-tts-model-cache-v1";
-const APP_CACHE = "kitten-tts-app-cache-v1";
+const APP_CACHE = "kitten-tts-app-cache-v2";
 
 const MODEL_ASSETS = [
   {
@@ -27,12 +27,20 @@ const els = {
   clearButton: document.querySelector("#clearButton"),
   connectionStatus: document.querySelector("#connectionStatus"),
   downloadButton: document.querySelector("#downloadButton"),
+  pauseButton: document.querySelector("#pauseButton"),
   progressBar: document.querySelector("#progressBar"),
+  speakButton: document.querySelector("#speakButton"),
+  speechStatus: document.querySelector("#speechStatus"),
+  speedInput: document.querySelector("#speedInput"),
   statusText: document.querySelector("#statusText"),
+  stopButton: document.querySelector("#stopButton"),
   storageEstimate: document.querySelector("#storageEstimate"),
+  textInput: document.querySelector("#textInput"),
+  voiceSelect: document.querySelector("#voiceSelect"),
 };
 
 let assetStates = new Map();
+let voices = [];
 
 init();
 
@@ -56,6 +64,107 @@ async function init() {
 
   els.downloadButton.addEventListener("click", downloadModel);
   els.clearButton.addEventListener("click", clearModelCache);
+  els.speakButton.addEventListener("click", speakText);
+  els.pauseButton.addEventListener("click", togglePause);
+  els.stopButton.addEventListener("click", stopSpeaking);
+
+  initSpeech();
+}
+
+function initSpeech() {
+  if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+    els.speakButton.disabled = true;
+    els.pauseButton.disabled = true;
+    els.stopButton.disabled = true;
+    els.speechStatus.textContent = "This browser does not support built-in text to speech.";
+    return;
+  }
+
+  loadVoices();
+  window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
+  els.speechStatus.textContent = "Ready to speak using this device's installed voices.";
+}
+
+function loadVoices() {
+  voices = window.speechSynthesis.getVoices();
+  els.voiceSelect.replaceChildren();
+
+  if (voices.length === 0) {
+    const option = document.createElement("option");
+    option.textContent = "Default device voice";
+    option.value = "";
+    els.voiceSelect.append(option);
+    return;
+  }
+
+  const preferred = voices.find((voice) => voice.lang?.toLowerCase().startsWith("en") && voice.localService)
+    || voices.find((voice) => voice.lang?.toLowerCase().startsWith("en"))
+    || voices[0];
+
+  for (const voice of voices) {
+    const option = document.createElement("option");
+    option.value = voice.voiceURI;
+    option.textContent = `${voice.name} (${voice.lang})${voice.localService ? " local" : ""}`;
+    option.selected = voice.voiceURI === preferred.voiceURI;
+    els.voiceSelect.append(option);
+  }
+}
+
+function speakText() {
+  const text = els.textInput.value.trim();
+  if (!text) {
+    els.speechStatus.textContent = "Enter text before speaking.";
+    return;
+  }
+
+  if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+    window.speechSynthesis.cancel();
+  }
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  const selectedVoice = voices.find((voice) => voice.voiceURI === els.voiceSelect.value);
+  if (selectedVoice) utterance.voice = selectedVoice;
+  utterance.rate = Number(els.speedInput.value);
+  utterance.pitch = 1;
+  utterance.volume = 1;
+
+  utterance.onstart = () => {
+    els.speechStatus.textContent = "Speaking...";
+    els.pauseButton.textContent = "Pause";
+  };
+  utterance.onpause = () => {
+    els.speechStatus.textContent = "Paused.";
+    els.pauseButton.textContent = "Resume";
+  };
+  utterance.onresume = () => {
+    els.speechStatus.textContent = "Speaking...";
+    els.pauseButton.textContent = "Pause";
+  };
+  utterance.onend = () => {
+    els.speechStatus.textContent = "Finished.";
+    els.pauseButton.textContent = "Pause";
+  };
+  utterance.onerror = (event) => {
+    els.speechStatus.textContent = `Speech failed: ${event.error || "unknown error"}.`;
+  };
+
+  window.speechSynthesis.speak(utterance);
+}
+
+function togglePause() {
+  if (!window.speechSynthesis.speaking && !window.speechSynthesis.paused) return;
+
+  if (window.speechSynthesis.paused) {
+    window.speechSynthesis.resume();
+  } else {
+    window.speechSynthesis.pause();
+  }
+}
+
+function stopSpeaking() {
+  window.speechSynthesis.cancel();
+  els.pauseButton.textContent = "Pause";
+  els.speechStatus.textContent = "Stopped.";
 }
 
 async function requestPersistentStorage() {

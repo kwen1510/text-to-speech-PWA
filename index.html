@@ -11,7 +11,7 @@
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="./icons/icon.svg">
-    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./styles.css?v=2">
   </head>
   <body>
     <main class="app-shell">
@@ -26,21 +26,14 @@
 
         <label class="field">
           <span>Text</span>
-          <textarea id="textInput" rows="7" spellcheck="true">This app can keep Kitten TTS model files on your phone after refresh.</textarea>
+          <textarea id="textInput" rows="7" spellcheck="true">Type something here, choose a device voice, and tap Speak.</textarea>
         </label>
 
         <div class="controls-grid">
           <label class="field">
-            <span>Voice</span>
+            <span>Device voice</span>
             <select id="voiceSelect">
-              <option>Bella</option>
-              <option>Jasper</option>
-              <option>Luna</option>
-              <option>Bruno</option>
-              <option>Rosie</option>
-              <option>Hugo</option>
-              <option>Kiki</option>
-              <option>Leo</option>
+              <option>Loading voices...</option>
             </select>
           </label>
 
@@ -49,6 +42,13 @@
             <input id="speedInput" type="range" min="0.7" max="1.4" step="0.05" value="1">
           </label>
         </div>
+
+        <div class="actions speech-actions">
+          <button id="speakButton" type="button">Speak</button>
+          <button id="pauseButton" class="secondary" type="button">Pause</button>
+          <button id="stopButton" class="secondary" type="button">Stop</button>
+        </div>
+        <p id="speechStatus" class="speech-status">Speech engine initializing...</p>
 
         <div class="actions">
           <button id="downloadButton" type="button">Download model</button>
@@ -72,6 +72,6 @@
       </section>
     </main>
 
-    <script type="module" src="./app.js"></script>
+    <script type="module" src="./app.js?v=2"></script>
   </body>
 </html>

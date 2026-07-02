@@ -1,11 +1,11 @@
-const APP_CACHE = "kitten-tts-app-cache-v1";
+const APP_CACHE = "kitten-tts-app-cache-v2";
 const MODEL_CACHE = "kitten-tts-model-cache-v1";
 
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css",
-  "./app.js",
+  "./styles.css?v=2",
+  "./app.js?v=2",
   "./manifest.webmanifest",
   "./icons/icon.svg",
 ];
@@ -25,7 +25,13 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys
+        .filter((key) => key.startsWith("kitten-tts-app-cache-") && key !== APP_CACHE)
+        .map((key) => caches.delete(key))))
+      .then(() => self.clients.claim()),
+  );
 });
 
 self.addEventListener("fetch", (event) => {

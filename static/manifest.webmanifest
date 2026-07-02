@@ -1,15 +1,15 @@
 {
-  "name": "Kitten TTS PWA",
+  "name": "Kitten TTS",
   "short_name": "Kitten TTS",
-  "description": "Offline-ready Kitten TTS model cache for phone use.",
-  "start_url": "./",
-  "scope": "./",
+  "description": "Render-hosted KittenTTS text to speech.",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#f4f6f8",
   "theme_color": "#111827",
   "icons": [
     {
-      "src": "./icons/icon.svg",
+      "src": "/static/icons/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"

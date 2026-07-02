@@ -1,21 +1,64 @@
-# Kitten TTS PWA
+# Kitten TTS Render Web App
 
-Static PWA shell for text to speech on a phone plus caching Kitten TTS model files. It is designed for GitHub Pages and uses Cache Storage plus the browser persistent-storage API so downloaded model files survive refreshes and normal app restarts.
+Single-service Flask app for running real KittenTTS text to speech on Render. Flask serves the mobile web UI and the `/api/tts` endpoint returns generated WAV audio.
 
-The current speaking path uses the browser/device `speechSynthesis` engine, so it works without a server. Quality and offline availability depend on the voices installed on the phone. The Kitten TTS model files are cached separately for a later full ONNX + phonemizer browser integration.
+This is online synthesis, not offline phone inference. Render Free can run it for personal testing, but idle services spin down and the first request after sleep can be slow.
 
-## Local test
+## Local development
 
 ```bash
-python3 -m http.server 4173
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+flask --app app run --debug
 ```
 
-Open `http://127.0.0.1:4173`, enter text, press **Speak**, then press **Download model**, refresh, and confirm all model files still show as cached.
+Open `http://127.0.0.1:5000`.
 
-## GitHub Pages
+Useful checks:
 
-Publish the repository root with GitHub Pages. The app uses relative paths, so it works from a project URL such as `https://kwen1510.github.io/text-to-speech-PWA/`.
+```bash
+curl http://127.0.0.1:5000/healthz
+curl http://127.0.0.1:5000/api/voices
+curl -X POST http://127.0.0.1:5000/api/tts \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Hello from Kitten TTS.","voice":"Bella","speed":1.0}' \
+  --output kitten.wav
+```
 
-## Cache behavior
+## Render deployment
 
-Browsers do not provide an absolute "never delete this" guarantee. This app calls `navigator.storage.persist()` and stores model files in a dedicated Cache Storage bucket. On supported browsers, persistent storage makes eviction much less likely. The app also checks the model cache on every load, so a refresh should immediately show the downloaded files as cached.
+Create a Render Web Service from this repository. `render.yaml` defines:
+
+- build command: `pip install -r requirements.txt`
+- start command: `gunicorn app:app --workers 1 --threads 2 --timeout 180`
+- health check: `/healthz`
+
+The service uses one Gunicorn worker so the KittenTTS model is loaded once per process.
+
+## API
+
+`GET /api/voices`
+
+Returns:
+
+```json
+{"voices":["Bella","Jasper","Luna","Bruno","Rosie","Hugo","Kiki","Leo"]}
+```
+
+`POST /api/tts`
+
+Body:
+
+```json
+{"text":"Hello world","voice":"Bella","speed":1.0}
+```
+
+Returns `audio/wav`.
+
+Validation:
+
+- text is required
+- text is capped by `MAX_TEXT_LENGTH`, default `1000`
+- voice must be one of the 8 KittenTTS voices
+- speed must be between `0.7` and `1.4`

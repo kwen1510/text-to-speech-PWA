@@ -11,6 +11,10 @@ os.environ.setdefault("XDG_CACHE_HOME", ".cache")
 
 
 def main() -> None:
+    if os.getenv("PRELOAD_FULL_POCKET_TTS_MODEL", "0") != "1":
+        print("Skipping full Pocket-TTS preload. Model will load lazily at runtime.")
+        return
+
     from pocket_tts import TTSModel
 
     language = os.getenv("POCKET_TTS_LANGUAGE", "english")

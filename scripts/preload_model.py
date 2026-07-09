@@ -15,7 +15,7 @@ def main() -> None:
 
     language = os.getenv("POCKET_TTS_LANGUAGE", "english")
     default_voice = os.getenv("POCKET_TTS_DEFAULT_VOICE", "alba")
-    quantize = os.getenv("POCKET_TTS_QUANTIZE", "0") == "1"
+    quantize = os.getenv("POCKET_TTS_QUANTIZE", "1") == "1"
 
     model = TTSModel.load_model(language=language, quantize=quantize)
     model.get_state_for_audio_prompt(default_voice)

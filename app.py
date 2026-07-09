@@ -14,12 +14,12 @@ from flask import Flask, jsonify, render_template, request, send_file
 
 os.environ.setdefault("HF_HOME", ".cache/huggingface")
 os.environ.setdefault("XDG_CACHE_HOME", ".cache")
-os.environ.setdefault("OMP_NUM_THREADS", "2")
-os.environ.setdefault("MKL_NUM_THREADS", "2")
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
 
-MAX_TEXT_LENGTH = int(os.getenv("MAX_TEXT_LENGTH", "1000"))
+MAX_TEXT_LENGTH = int(os.getenv("MAX_TEXT_LENGTH", "300"))
 POCKET_LANGUAGE = os.getenv("POCKET_TTS_LANGUAGE", "english")
-POCKET_QUANTIZE = os.getenv("POCKET_TTS_QUANTIZE", "0") == "1"
+POCKET_QUANTIZE = os.getenv("POCKET_TTS_QUANTIZE", "1") == "1"
 DEFAULT_VOICE = os.getenv("POCKET_TTS_DEFAULT_VOICE", "alba")
 VOICE_NAMES = (
     "alba",

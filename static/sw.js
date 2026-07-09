@@ -1,4 +1,4 @@
-const APP_CACHE = "kitten-tts-render-app-v1";
+const APP_CACHE = "pocket-tts-render-app-v1";
 
 const APP_SHELL = [
   "/",
@@ -20,7 +20,10 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys()
       .then((keys) => Promise.all(keys
-        .filter((key) => key.startsWith("kitten-tts-render-app-") && key !== APP_CACHE)
+        .filter((key) => (
+          key.startsWith("kitten-tts-render-app-")
+          || key.startsWith("pocket-tts-render-app-")
+        ) && key !== APP_CACHE)
         .map((key) => caches.delete(key))))
       .then(() => self.clients.claim()),
   );

@@ -6,22 +6,23 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from kitten_runtime import download_from_huggingface
+os.environ.setdefault("HF_HOME", ".cache/huggingface")
+os.environ.setdefault("XDG_CACHE_HOME", ".cache")
 
 
 def main() -> None:
-    model_name = os.getenv("KITTEN_MODEL_NAME", "KittenML/kitten-tts-nano-0.8")
-    fallback_name = os.getenv("KITTEN_FALLBACK_MODEL_NAME", "KittenML/kitten-tts-mini-0.8")
-    cache_dir = os.getenv("KITTEN_CACHE_DIR", ".cache/huggingface")
+    from pocket_tts import TTSModel
 
-    try:
-        download_from_huggingface(model_name, cache_dir=cache_dir)
-        print(f"Preloaded {model_name} into {cache_dir}")
-    except Exception:
-        if fallback_name == model_name:
-            raise
-        download_from_huggingface(fallback_name, cache_dir=cache_dir)
-        print(f"Preloaded fallback {fallback_name} into {cache_dir}")
+    language = os.getenv("POCKET_TTS_LANGUAGE", "english")
+    default_voice = os.getenv("POCKET_TTS_DEFAULT_VOICE", "alba")
+    quantize = os.getenv("POCKET_TTS_QUANTIZE", "0") == "1"
+
+    model = TTSModel.load_model(language=language, quantize=quantize)
+    model.get_state_for_audio_prompt(default_voice)
+    print(
+        f"Preloaded Pocket-TTS language={language} voice={default_voice} "
+        f"sample_rate={model.sample_rate}"
+    )
 
 
 if __name__ == "__main__":

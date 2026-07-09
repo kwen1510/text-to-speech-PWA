@@ -1,7 +1,7 @@
 {
-  "name": "Kitten TTS",
-  "short_name": "Kitten TTS",
-  "description": "Render-hosted KittenTTS text to speech.",
+  "name": "Pocket TTS",
+  "short_name": "Pocket TTS",
+  "description": "Render-hosted Pocket-TTS text to speech.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

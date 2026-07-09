@@ -4,8 +4,6 @@ const els = {
   form: document.querySelector("#ttsForm"),
   generateButton: document.querySelector("#generateButton"),
   serviceStatus: document.querySelector("#serviceStatus"),
-  speedInput: document.querySelector("#speedInput"),
-  speedValue: document.querySelector("#speedValue"),
   statusText: document.querySelector("#statusText"),
   textInput: document.querySelector("#textInput"),
   voiceSelect: document.querySelector("#voiceSelect"),
@@ -17,9 +15,8 @@ init();
 
 function init() {
   els.form.addEventListener("submit", generateSpeech);
-  els.speedInput.addEventListener("input", updateSpeedValue);
-  updateSpeedValue();
   checkHealth();
+  warmupModel();
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/static/sw.js").catch(() => {
@@ -39,12 +36,20 @@ async function checkHealth() {
   }
 }
 
+async function warmupModel() {
+  try {
+    const response = await fetch("/api/warmup", { method: "POST" });
+    if (response.ok) checkHealth();
+  } catch {
+    // Warmup is best-effort; generation will still load the model if needed.
+  }
+}
+
 async function generateSpeech(event) {
   event.preventDefault();
 
   const text = els.textInput.value.trim();
   const voice = els.voiceSelect.value;
-  const speed = Number(els.speedInput.value);
 
   if (!text) {
     setStatus("Enter text before generating speech.", true);
@@ -52,14 +57,14 @@ async function generateSpeech(event) {
   }
 
   setLoading(true);
-  setStatus("Generating KittenTTS audio...");
+  setStatus("Generating Pocket-TTS audio...");
   revokeCurrentAudio();
 
   try {
     const response = await fetch("/api/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, voice, speed }),
+      body: JSON.stringify({ text, voice }),
     });
 
     if (!response.ok) {
@@ -77,7 +82,7 @@ async function generateSpeech(event) {
     currentAudioUrl = URL.createObjectURL(blob);
     els.audioPlayer.src = currentAudioUrl;
     els.downloadLink.href = currentAudioUrl;
-    els.downloadLink.download = `kitten-${voice.toLowerCase()}-${speed.toFixed(2)}.wav`;
+    els.downloadLink.download = `pocket-${voice.toLowerCase()}.wav`;
     els.downloadLink.classList.remove("disabled");
     els.downloadLink.removeAttribute("aria-disabled");
     setStatus("Audio generated.");
@@ -94,10 +99,6 @@ async function generateSpeech(event) {
   } finally {
     setLoading(false);
   }
-}
-
-function updateSpeedValue() {
-  els.speedValue.textContent = Number(els.speedInput.value).toFixed(2);
 }
 
 function setLoading(isLoading) {

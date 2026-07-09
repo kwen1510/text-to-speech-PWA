@@ -1,10 +1,8 @@
-# Kitten TTS Render Web App
+# Pocket TTS Render Web App
 
-Single-service Flask app for running real KittenTTS text to speech on Render. Flask serves the mobile web UI and the `/api/tts` endpoint returns generated WAV audio.
+Single-service Flask app for running Kyutai Pocket-TTS from a mobile-friendly PWA shell. Flask serves the UI and `/api/tts` returns generated WAV audio.
 
-This repo uses a slim local KittenTTS runtime instead of the official `kittentts` wheel, because the official wheel pulls in large packages that are not needed for the ONNX + eSpeak inference path used by this app.
-
-This is online synthesis, not offline phone inference. Render Free can run it for personal testing, but idle services spin down and the first request after sleep can be slow.
+This is online server-side synthesis, not offline phone inference. The model stays loaded in the Python process while the service is awake.
 
 ## Local development
 
@@ -22,10 +20,11 @@ Useful checks:
 ```bash
 curl http://127.0.0.1:5000/healthz
 curl http://127.0.0.1:5000/api/voices
+curl -X POST http://127.0.0.1:5000/api/warmup
 curl -X POST http://127.0.0.1:5000/api/tts \
   -H "Content-Type: application/json" \
-  -d '{"text":"Hello from Kitten TTS.","voice":"Bella","speed":1.0}' \
-  --output kitten.wav
+  -d '{"text":"Hello from Pocket TTS.","voice":"alba"}' \
+  --output pocket.wav
 ```
 
 ## Render deployment
@@ -36,9 +35,9 @@ Create a Render Web Service from this repository. `render.yaml` defines:
 - start command: `gunicorn app:app`
 - health check: `/healthz`
 
-The service uses `gunicorn.conf.py` to set one worker, two threads, and a 180 second timeout, even if Render runs plain `gunicorn app:app`. The build step preloads the Hugging Face model files into `.cache/huggingface` so the first `/api/tts` request does not have to download the model.
+The service uses `gunicorn.conf.py` to set one worker, two threads, and a 180 second timeout. The build step loads the default Pocket-TTS English model and the default `alba` voice once, so Hugging Face files are cached before runtime.
 
-`/api/tts` returns a `Server-Timing` header and logs timing for model load, generation, WAV encoding, and total request time. ONNX Runtime is capped to one intra-op and one inter-op thread by default, which is usually more predictable on small Render instances.
+Render Free may still be slow or memory-constrained because Pocket-TTS uses PyTorch CPU. For fast personal use, a Mac mini or a paid CPU instance is a better target than Render Free.
 
 ## API
 
@@ -47,15 +46,19 @@ The service uses `gunicorn.conf.py` to set one worker, two threads, and a 180 se
 Returns:
 
 ```json
-{"voices":["Bella","Jasper","Luna","Bruno","Rosie","Hugo","Kiki","Leo"]}
+{"voices":["alba","anna","charles","mary","michael","vera","george","jane"],"default_voice":"alba"}
 ```
+
+`POST /api/warmup`
+
+Loads the model and default voice state into memory.
 
 `POST /api/tts`
 
 Body:
 
 ```json
-{"text":"Hello world","voice":"Bella","speed":1.0}
+{"text":"Hello world","voice":"alba"}
 ```
 
 Returns `audio/wav`.
@@ -64,5 +67,13 @@ Validation:
 
 - text is required
 - text is capped by `MAX_TEXT_LENGTH`, default `1000`
-- voice must be one of the 8 KittenTTS voices
-- speed must be between `0.7` and `1.4`
+- voice must be one of the configured Pocket-TTS voices
+
+## Configuration
+
+- `POCKET_TTS_LANGUAGE`: default `english`
+- `POCKET_TTS_DEFAULT_VOICE`: default `alba`
+- `POCKET_TTS_QUANTIZE`: default `0`; set `1` only after adding compatible quantization dependencies
+- `MAX_TEXT_LENGTH`: default `1000`
+- `HF_HOME`: default `.cache/huggingface`
+- `XDG_CACHE_HOME`: default `.cache`

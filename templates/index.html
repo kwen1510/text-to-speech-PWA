@@ -6,9 +6,9 @@
     <meta name="theme-color" content="#111827">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Kitten TTS">
+    <meta name="apple-mobile-web-app-title" content="Pocket TTS">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Kitten TTS</title>
+    <title>Pocket TTS</title>
     <link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}">
     <link rel="icon" href="{{ url_for('static', filename='icons/icon.svg') }}" type="image/svg+xml">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon.svg') }}">
@@ -19,8 +19,8 @@
       <section class="panel">
         <header class="header">
           <div>
-            <p class="eyebrow">Render-hosted KittenTTS</p>
-            <h1>Kitten TTS</h1>
+            <p class="eyebrow">Render-hosted Pocket-TTS</p>
+            <h1>Pocket TTS</h1>
           </div>
           <span id="serviceStatus" class="status-pill">Checking</span>
         </header>
@@ -33,22 +33,17 @@
               maxlength="{{ max_text_length }}"
               rows="8"
               spellcheck="true"
-            >This is real KittenTTS running from a Flask app on Render.</textarea>
+            >This is Pocket TTS running from a Flask app. It keeps the model in memory between requests.</textarea>
           </label>
 
           <div class="controls-grid">
             <label class="field">
-              <span>Kitten voice</span>
+              <span>Pocket voice</span>
               <select id="voiceSelect">
                 {% for voice in voices %}
-                  <option value="{{ voice }}" {% if voice == "Bella" %}selected{% endif %}>{{ voice }}</option>
+                  <option value="{{ voice }}" {% if voice == default_voice %}selected{% endif %}>{{ voice | title }}</option>
                 {% endfor %}
               </select>
-            </label>
-
-            <label class="field">
-              <span>Speed <output id="speedValue">1.00</output></span>
-              <input id="speedInput" type="range" min="0.7" max="1.4" step="0.05" value="1">
             </label>
           </div>
 
@@ -66,7 +61,7 @@
     </main>
 
     <script>
-      window.KITTEN_TTS_CONFIG = {
+      window.POCKET_TTS_CONFIG = {
         maxTextLength: {{ max_text_length }},
         voices: {{ voices | list | tojson }}
       };

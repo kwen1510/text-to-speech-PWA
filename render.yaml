@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: kitten-tts-web
+    name: pocket-tts-web
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt && python scripts/preload_model.py
@@ -11,19 +11,23 @@ services:
         value: 3.12
       - key: MAX_TEXT_LENGTH
         value: "1000"
-      - key: KITTEN_MODEL_NAME
-        value: KittenML/kitten-tts-nano-0.8
-      - key: KITTEN_FALLBACK_MODEL_NAME
-        value: KittenML/kitten-tts-mini-0.8
-      - key: KITTEN_CACHE_DIR
+      - key: POCKET_TTS_LANGUAGE
+        value: english
+      - key: POCKET_TTS_DEFAULT_VOICE
+        value: alba
+      - key: POCKET_TTS_QUANTIZE
+        value: "0"
+      - key: HF_HOME
         value: .cache/huggingface
+      - key: XDG_CACHE_HOME
+        value: .cache
       - key: WEB_CONCURRENCY
         value: "1"
       - key: GUNICORN_THREADS
         value: "2"
       - key: GUNICORN_TIMEOUT
         value: "180"
-      - key: ORT_INTRA_OP_THREADS
-        value: "1"
-      - key: ORT_INTER_OP_THREADS
-        value: "1"
+      - key: OMP_NUM_THREADS
+        value: "2"
+      - key: MKL_NUM_THREADS
+        value: "2"

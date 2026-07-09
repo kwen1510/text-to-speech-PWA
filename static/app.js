@@ -16,7 +16,6 @@ init();
 function init() {
   els.form.addEventListener("submit", generateSpeech);
   checkHealth();
-  warmupModel();
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/static/sw.js").catch(() => {
@@ -33,15 +32,6 @@ async function checkHealth() {
     els.serviceStatus.textContent = data.model_loaded ? "Model ready" : "Online";
   } catch {
     els.serviceStatus.textContent = "Offline";
-  }
-}
-
-async function warmupModel() {
-  try {
-    const response = await fetch("/api/warmup", { method: "POST" });
-    if (response.ok) checkHealth();
-  } catch {
-    // Warmup is best-effort; generation will still load the model if needed.
   }
 }
 

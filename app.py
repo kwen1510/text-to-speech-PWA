@@ -5,6 +5,7 @@ import os
 import threading
 import time
 import wave
+import gc
 from typing import Any
 
 import numpy as np
@@ -38,6 +39,7 @@ _model: Any | None = None
 _model_lock = threading.Lock()
 _voice_states: dict[str, Any] = {}
 _voice_lock = threading.Lock()
+_runtime_lock = threading.Lock()
 _generation_lock = threading.Lock()
 
 
@@ -54,6 +56,7 @@ def get_tts_model() -> Any:
         from pocket_tts import TTSModel
 
         _model = TTSModel.load_model(language=POCKET_LANGUAGE, quantize=POCKET_QUANTIZE)
+        gc.collect()
         return _model
 
 
@@ -140,8 +143,9 @@ def voices():
 def warmup():
     start_time = time.perf_counter()
     try:
-        model = get_tts_model()
-        get_voice_state(DEFAULT_VOICE)
+        with _runtime_lock:
+            model = get_tts_model()
+            get_voice_state(DEFAULT_VOICE)
     except Exception as exc:
         app.logger.exception("Pocket-TTS warmup failed")
         return jsonify({"error": f"Pocket-TTS warmup failed: {exc}"}), 500
@@ -166,13 +170,14 @@ def tts():
     generate_done = start_time
     try:
         text, voice = validate_tts_payload(request.get_json(silent=True))
-        model = get_tts_model()
-        model_done = time.perf_counter()
-        voice_state = get_voice_state(voice)
-        voice_done = time.perf_counter()
-        with _generation_lock:
-            audio = model.generate_audio(voice_state, text)
-        generate_done = time.perf_counter()
+        with _runtime_lock:
+            model = get_tts_model()
+            model_done = time.perf_counter()
+            voice_state = get_voice_state(voice)
+            voice_done = time.perf_counter()
+            with _generation_lock:
+                audio = model.generate_audio(voice_state, text)
+            generate_done = time.perf_counter()
         wav_buffer = audio_to_wav_bytes(audio, model.sample_rate)
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400

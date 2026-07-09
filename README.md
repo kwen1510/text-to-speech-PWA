@@ -35,9 +35,9 @@ Create a Render Web Service from this repository. `render.yaml` defines:
 - start command: `gunicorn app:app`
 - health check: `/healthz`
 
-The service uses `gunicorn.conf.py` to set one worker, two threads, and a 180 second timeout. The build step loads the default Pocket-TTS English model and the default `alba` voice once, so Hugging Face files are cached before runtime.
+The service uses `gunicorn.conf.py` to set one worker, one thread, and a 180 second timeout. The build step loads the default Pocket-TTS English model and the default `alba` voice once, so Hugging Face files are cached before runtime.
 
-Render Free may still be slow or memory-constrained because Pocket-TTS uses PyTorch CPU. For fast personal use, a Mac mini or a paid CPU instance is a better target than Render Free.
+Render Free may still be slow or memory-constrained because Pocket-TTS uses PyTorch CPU. This repo enables Pocket-TTS quantization and keeps Render to one worker/thread, but a Mac mini or a paid CPU instance is a better target for reliable Pocket-TTS hosting.
 
 ## API
 
@@ -73,7 +73,7 @@ Validation:
 
 - `POCKET_TTS_LANGUAGE`: default `english`
 - `POCKET_TTS_DEFAULT_VOICE`: default `alba`
-- `POCKET_TTS_QUANTIZE`: default `0`; set `1` only after adding compatible quantization dependencies
+- `POCKET_TTS_QUANTIZE`: default `0`; Render uses `1` to reduce steady-state memory
 - `MAX_TEXT_LENGTH`: default `1000`
 - `HF_HOME`: default `.cache/huggingface`
 - `XDG_CACHE_HOME`: default `.cache`

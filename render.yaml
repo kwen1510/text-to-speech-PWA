@@ -10,13 +10,13 @@ services:
       - key: PYTHON_VERSION
         value: 3.12
       - key: MAX_TEXT_LENGTH
-        value: "1000"
+        value: "300"
       - key: POCKET_TTS_LANGUAGE
         value: english
       - key: POCKET_TTS_DEFAULT_VOICE
         value: alba
       - key: POCKET_TTS_QUANTIZE
-        value: "0"
+        value: "1"
       - key: HF_HOME
         value: .cache/huggingface
       - key: XDG_CACHE_HOME
@@ -24,10 +24,12 @@ services:
       - key: WEB_CONCURRENCY
         value: "1"
       - key: GUNICORN_THREADS
-        value: "2"
+        value: "1"
       - key: GUNICORN_TIMEOUT
         value: "180"
       - key: OMP_NUM_THREADS
-        value: "2"
+        value: "1"
       - key: MKL_NUM_THREADS
+        value: "1"
+      - key: MALLOC_ARENA_MAX
         value: "2"
